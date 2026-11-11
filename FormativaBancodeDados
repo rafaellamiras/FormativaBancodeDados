@@ -1,0 +1,179 @@
+CREATE DATABASE Academia_Rafaella;
+
+USE Academia_Rafaella;
+
+SELECT name AS NomeBanco
+FROM sys.databases
+ORDER BY name;
+
+SELECT TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_TYPE = 'BASE TABLE'
+ORDER BY TABLE_NAME;
+
+SELECT DB_NAME() AS BancoAtual
+
+CREATE TABLE Clientes(
+    IdCliente INT PRIMARY KEY IDENTITY (1,1),
+    Nome VARCHAR(100) NOT NULL,
+    CPF VARCHAR(11) NOT NULL UNIQUE,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Telefone VARCHAR(20) NOT NULL,
+    DataNascimento DATE NOT NULL,
+    Ativo BIT NOT NULL DEFAULT 1
+)
+
+CREATE TABLE Instrutores(
+    IdInstrutor INT PRIMARY KEY IDENTITY (1,1),
+    Nome VARCHAR(100) NOT NULL,
+    CREF VARCHAR(20) NOT NULL UNIQUE,
+    Especialidade VARCHAR(80) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Ativo BIT NOT NULL DEFAULT 1
+)
+
+CREATE TABLE Modalidades(
+    IdModalidade INT PRIMARY KEY IDENTITY (1,1),
+    NomeModalidade VARCHAR(80) NOT NULL UNIQUE,
+    Nivel VARCHAR(20) NOT NULL,
+    DuracaoMinutos INT NOT NULL CHECK(DuracaoMinutos > 0),
+    Descricao VARCHAR(200) NOT NULL
+)
+
+CREATE TABLE Planos(
+    IdPlano INT PRIMARY KEY IDENTITY (1,1),
+    NomePlano VARCHAR(80) NOT NULL UNIQUE,
+    ValorMensal DECIMAL(10,2) NOT NULL CHECK (ValorMensal > 0),
+    DuracaoMeses INT NOT NULL CHECK (DuracaoMeses > 0 AND DuracaoMeses < 24),
+    AcessoLivre BIT NOT NULL DEFAULT 0
+)
+
+CREATE TABLE Matriculas(
+    IdMatricula INT PRIMARY KEY IDENTITY (1,1),
+    IdCliente INT NOT NULL,
+    IdPlano INT NOT NULL,
+    DataInicio DATE NOT NULL,
+    StatusMatricula VARCHAR(15) NOT NULL DEFAULT 'Ativa',
+    Desconto DECIMAL(5,2) DEFAULT 0 CHECK (Desconto BETWEEN 0 AND 100),
+
+    CONSTRAINT FK_Matriculas_Clientes
+    FOREIGN KEY(IdCliente) REFERENCES Clientes(IdCliente),
+
+    CONSTRAINT FK_Matriculas_PLanos
+    FOREIGN KEY(IdPlano) REFERENCES Planos(IdPlano)
+)
+
+CREATE TABLE Aulas(
+    IdAula INT PRIMARY KEY IDENTITY (1,1),
+    IdModalidade INT NOT NULL,
+    IdInstrutor INT NOT NULL,
+    DataAula DATE NOT NULL,
+    Horario TIME NOT NULL,
+    Vagas INT NOT NULL CHECK (Vagas BETWEEN 1 AND 50),
+    Sala VARCHAR(30) NOT NULL,
+
+    CONSTRAINT FK_Aulas_Modalidades
+    FOREIGN KEY(IdModalidade) REFERENCES Modalidades(IdModalidade),
+
+    CONSTRAINT FK_Aulas_Instrutores
+    FOREIGN KEY(IdInstrutor) REFERENCES Instrutores(IdInstrutor)
+)
+
+INSERT INTO Clientes (Nome, CPF, Email, Telefone, DataNascimento, Ativo)
+VALUES
+('Ana Clara Souza', '12345678901', 'ana.souza@email.com', '(14) 99111-1111', '2002-05-10', 1),
+('Bruno Oliveira', '23456789012', 'bruno.oliveira@email.com', '(14) 99222-2222', '1998-08-15', 1),
+('Camila Santos', '34567890123', 'camila.santos@email.com', '(14) 99333-3333', '2000-03-22', 1),
+('Daniel Ferreira', '45678901234', 'daniel.ferreira@email.com', '(14) 99444-4444', '1995-11-30', 1),
+('Eduarda Lima', '56789012345', 'eduarda.lima@email.com', '(14) 99555-5555', '2003-07-18', 1),
+('Felipe Costa', '67890123456', 'felipe.costa@email.com', '(14) 99666-6666', '1999-01-25', 1),
+('Gabriela Martins', '78901234567', 'gabriela.martins@email.com', '(14) 99777-7777', '2001-09-12', 1),
+('Henrique Rocha', '89012345678', 'henrique.rocha@email.com', '(14) 99888-8888', '1997-04-05', 1),
+('Isabela Mendes', '90123456789', 'isabela.mendes@email.com', '(14) 99999-9999', '2004-12-20', 1),
+('João Pedro Alves', '01234567890', 'joao.alves@email.com', '(14) 99000-0000', '1996-06-14', 1);
+
+SELECT * FROM Clientes;
+
+INSERT INTO Instrutores (Nome, CREF, Especialidade, Email, Ativo)
+VALUES
+('André Silva', 'CREF-SP-1001', 'Musculação', 'andre.silva@movimentomais.com', 1),
+('Beatriz Costa', 'CREF-SP-1002', 'Pilates', 'beatriz.costa@movimentomais.com', 1),
+('Caio Mendes', 'CREF-SP-1003', 'Cross Training', 'caio.mendes@movimentomais.com', 1),
+('Daniela Reis', 'CREF-SP-1004', 'Dança', 'daniela.reis@movimentomais.com', 1),
+('Eduardo Lima', 'CREF-SP-1005', 'Natação', 'eduardo.lima@movimentomais.com', 1),
+('Fernanda Alves', 'CREF-SP-1006', 'Yoga', 'fernanda.alves@movimentomais.com', 1),
+('Gabriel Rocha', 'CREF-SP-1007', 'Funcional', 'gabriel.rocha@movimentomais.com', 1),
+('Helena Souza', 'CREF-SP-1008', 'Corrida', 'helena.souza@movimentomais.com', 1),
+('Igor Martins', 'CREF-SP-1009', 'Lutas', 'igor.martins@movimentomais.com', 1),
+('Juliana Nunes', 'CREF-SP-1010', 'Alongamento', 'juliana.nunes@movimentomais.com', 1);
+
+select * from Instrutores;
+
+INSERT INTO Modalidades (NomeModalidade, Nivel, DuracaoMinutos, Descricao)
+VALUES
+('Musculação', 'Todos', 60, 'Treinamento de força e resistência muscular'),
+('Pilates', 'Todos', 60, 'Exercícios para postura, equilíbrio e flexibilidade'),
+('Cross Training', 'Intermediário', 45, 'Treinamento funcional de alta intensidade'),
+('Dança', 'Todos', 60, 'Aulas de dança para condicionamento físico'),
+('Natação', 'Todos', 60, 'Prática de natação para condicionamento físico'),
+('Yoga', 'Todos', 60, 'Exercícios de respiração, equilíbrio e flexibilidade'),
+('Funcional', 'Intermediário', 45, 'Treinamento funcional para força e agilidade'),
+('Corrida', 'Intermediário', 45, 'Treinamento para resistência cardiovascular'),
+('Lutas', 'Intermediário', 45, 'Aulas de técnicas de luta e condicionamento'),
+('Alongamento', 'Todos', 60, 'Exercícios para melhorar a flexibilidade');
+
+select * from Modalidades;
+
+INSERT INTO Planos (NomePlano, ValorMensal, DuracaoMeses, AcessoLivre)
+VALUES
+('Básico Mensal', 89.90, 1, 0),
+('Básico Trimestral', 79.90, 3, 0),
+('Básico Semestral', 74.90, 6, 0),
+('Premium Mensal', 129.90, 1, 1),
+('Premium Trimestral', 119.90, 3, 1),
+('Premium Semestral', 109.90, 6, 1),
+('Estudante Mensal', 69.90, 1, 0),
+('Estudante Anual', 59.90, 12, 0),
+('Família Mensal', 199.90, 1, 1),
+('Corporativo Anual', 99.90, 12, 1);
+
+select * from Planos;
+
+INSERT INTO Matriculas
+(IdCliente, IdPlano, DataInicio, StatusMatricula, Desconto)
+VALUES
+(1, 7, '2026-02-01', 'Ativa', 0),
+(2, 4, '2026-02-01', 'Ativa', 10),
+(3, 6, '2026-02-02', 'Ativa', 0),
+(4, 1, '2026-02-02', 'Suspensa', 0),
+(5, 5, '2026-02-03', 'Ativa', 5),
+(6, 2, '2026-02-03', 'Encerrada', 0),
+(7, 8, '2026-02-04', 'Ativa', 15),
+(8, 9, '2026-02-04', 'Ativa', 0),
+(9, 7, '2026-02-05', 'Ativa', 20),
+(10, 10, '2026-02-05', 'Ativa', 0);
+
+select * from Matriculas;
+
+INSERT INTO Aulas
+(IdModalidade, IdInstrutor, DataAula, Horario, Vagas, Sala)
+VALUES
+(1, 1, '2026-03-02', '07:00', 20, 'Sala de Musculação'),
+(2, 2, '2026-03-02', '08:00', 12, 'Estúdio 1'),
+(3, 3, '2026-03-02', '18:00', 18, 'Box Funcional'),
+(4, 4, '2026-03-03', '19:00', 25, 'Sala de Dança'),
+(5, 5, '2026-03-03', '09:00', 10, 'Piscina'),
+(6, 6, '2026-03-04', '07:30', 15, 'Estúdio 2'),
+(7, 7, '2026-03-04', '18:30', 20, 'Box Funcional'),
+(8, 8, '2026-03-05', '06:30', 30, 'Pista Externa'),
+(9, 9, '2026-03-05', '20:00', 16, 'Sala de Lutas'),
+(10, 10, '2026-03-06', '17:00', 20, 'Estúdio 1');
+
+select * from Aulas;
+
+SELECT Nome,Email, telefone
+FROM Clientes
+ORDER BY Nome ASC
+
+SELECT TOP 5 ValorMensal
+FROM Planos ORDER BY ValorMensal DESC;
